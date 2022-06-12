@@ -84,15 +84,16 @@ def main(args):
 
         writer.add_scalar("Loss/train", np.mean(epoch_loss), epoch)
         
-        torch.save({
-                "epoch": epoch,
-                "model_state_dict": model.state_dict(),
-                "optimizer_state_dict": opt.state_dict()
-            }, PATH+"epoch_{}_train_loss_{}.pth".format(epoch, np.mean(epoch_loss)))
+        if epoch % 5 == 0:
+            torch.save({
+                    "epoch": epoch,
+                    "model_state_dict": model.state_dict(),
+                    "optimizer_state_dict": opt.state_dict()
+                }, PATH+"epoch_{}_train_loss_{}.pth".format(epoch, np.mean(epoch_loss)))
 
-        # Plot
-        grid = make_grid([normalized_outputs])
-        writer.add_images(str(epoch), grid)
+            # Plot
+            grid = make_grid([normalized_outputs])
+            writer.add_images(str(epoch), grid)
                 
         model.eval()
         with torch.no_grad():
