@@ -2,6 +2,8 @@ import os
 import argparse
 from tqdm import tqdm
 
+import numpy as np
+
 import torch
 from torch.optim import SGD
 import torch.nn.functional as F
@@ -58,12 +60,11 @@ def main(args):
 
     for epoch in tqdm(range(last_epoch, epochs+last_epoch), desc="Train"):
 
-        running_loss = 0
-        last_loss = 0
-
         model.train()
         for train_batch in tqdm(train, desc="Epoch: " + str(epoch)):
             
+            epoch_loss = []
+
             inputs, targets = train_batch["image"], train_batch["fixation"]
 
             inputs = inputs.to(device)
@@ -79,27 +80,24 @@ def main(args):
             
             normalized_outputs = torch.sigmoid(outputs)
 
-            running_loss += loss.item()
+            epoch_loss.append(loss.item())
 
-        if epoch % 5 == 0:
-            last_loss = running_loss /  train_batch_size# loss per batch
-            writer.add_scalar("Loss/train", last_loss, epoch)
-            running_loss = 0
+        writer.add_scalar("Loss/train", np.mean(epoch_loss), epoch)
+        
+        torch.save({
+                "epoch": epoch,
+                "model_state_dict": model.state_dict(),
+                "optimizer_state_dict": opt.state_dict()
+            }, PATH+"epoch_{}_train_loss_{}.pth".format(epoch, np.mean(epoch_loss)))
 
-            torch.save({
-                    "epoch": epoch,
-                    "model_state_dict": model.state_dict(),
-                    "optimizer_state_dict": opt.state_dict()
-                }, PATH+"_epoch_{}_train_loss_{}.pth".format(epoch, last_loss))
-
-            # Plot
-            grid = make_grid([normalized_outputs])
-            writer.add_images(str(epoch), grid)
+        # Plot
+        grid = make_grid([normalized_outputs])
+        writer.add_images(str(epoch), grid)
                 
         model.eval()
         with torch.no_grad():
 
-            running_loss = 0
+            epoch_loss = []
             for val_batch in tqdm(valid, desc="Validation"):
                 inputs, targets = val_batch["image"], val_batch["fixation"]
             
@@ -109,11 +107,10 @@ def main(args):
                 outputs = model(inputs)
                 
                 valid_loss = loss_fn(outputs, targets).item()
-                running_loss += valid_loss
+                epoch_loss.append(valid_loss)
             
-            avg_loss = running_loss / (epoch+1)
-
-            writer.add_scalar("Loss/valid", avg_loss, epoch)
+            print("Epoch {}: validation loss {}".format(epoch, np.mean(epoch_loss)))
+            writer.add_scalar("Loss/valid", np.mean(epoch_loss), epoch)
 
     writer.close()
 
