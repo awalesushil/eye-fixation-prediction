@@ -1,0 +1,6 @@
+__pycache__/
+.env/
+data/
+src/runs/
+checkpoints/
+*.zip
