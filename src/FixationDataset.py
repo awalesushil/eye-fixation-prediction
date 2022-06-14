@@ -10,12 +10,12 @@ class FixationDataset(Dataset):
     def __init__(self, root_dir, image_file, fixation_file=None, transform=None, test=False):
         self.test = test
         self.root_dir = root_dir
-        self.image_files = read_text_file(os.path.join(self.root_dir,image_file))[:100]
+        self.image_files = read_text_file(os.path.join(self.root_dir,image_file))
         self.image_transform = transform["image"]
         self.raw_transform = transform["raw_image"]
         
         if not self.test:
-            self.fixation_files = read_text_file(os.path.join(self.root_dir,fixation_file))[:100]
+            self.fixation_files = read_text_file(os.path.join(self.root_dir,fixation_file))
             assert len(self.image_files) == len(self.fixation_files), "Lengths of image files and fixation files do not match!"
             self.fixation_transform = transform["fixation"]
     

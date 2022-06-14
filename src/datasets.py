@@ -6,8 +6,6 @@ from transformations import get_transformer
 
 def get_dataloaders(data_dir, train_batch_size, valid_batch_size):
 
-    data_dir = "../data/"
-
     transform = get_transformer()
 
     # Load the datasets

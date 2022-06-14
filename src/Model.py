@@ -16,7 +16,7 @@ kernel = torch.matmul(g.unsqueeze(-1), g.unsqueeze(-1).t())
 kernel = kernel[None, None, :] # Remove extra dimensions
 
 # Define center bias
-center_bias = torch.from_numpy(np.load("../data/center_bias_density.npy"))
+center_bias = torch.from_numpy(np.load("/export/scratch/CV2/center_bias_density.npy"))
 
 
 class Model(nn.Module):

@@ -53,6 +53,7 @@ def main(args):
     last_epoch = 0
     if resume:
         checkpoint = torch.load(PATH+checkpoint)
+        print(checkpoint)
         model.load_state_dict(checkpoint["model_state_dict"])
         opt.load_state_dict(checkpoint["optimizer_state_dict"])
         last_epoch = checkpoint["epoch"]
@@ -110,9 +111,9 @@ def main(args):
                 valid_loss = loss_fn(outputs, targets).item()
                 epoch_loss.append(valid_loss)
             
-            print("Epoch {}: validation loss {}".format(epoch, np.mean(epoch_loss)))
+            #print("Epoch {}: validation loss {}".format(epoch, np.mean(epoch_loss)))
             writer.add_scalar("Loss/valid", np.mean(epoch_loss), epoch)
-
+    torch.save({"epoch": epoch, "model_state_dict": opt.state_dict(), "optimizer_state_dict": opt.state_dict()}, PATH+"epoch_{}_train_loss_{}.path".format(epoch, np.mean(epoch_loss)))
     writer.close()
 
 
@@ -121,7 +122,7 @@ if __name__ == '__main__':
     parser.add_argument('--epochs', default=15, help='Number of epochs to train the model for', type=int)
     parser.add_argument('--lr', default=0.0004, help='Learning Rate', type=float)
     parser.add_argument('--resume', default=False, help='Resume training', type=bool)
-    parser.add_argument('--checkpoint', default=None, help='Checkpoint dictionary', type=dict)
+    parser.add_argument('--checkpoint', default=None, help='Checkpoint dictionary', type=str)
     parser.add_argument('--train_batch_size', default=32, help='Batch size for train', type=int)
     parser.add_argument('--valid_batch_size', default=64, help='Batch size for valid/test', type=int)
     parser.add_argument('--data_dir', default="data/", help='Data directory path', type=str)
